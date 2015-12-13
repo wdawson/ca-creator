@@ -72,7 +72,7 @@ openssl req -config openssl.cnf \
 chmod 444 certs/root.cert.pem
 
 # verify root cert
-read -p "$COLOR_YELLOW*** Would you like to verify the root certificate? [Y/n]: $TEXT_RESET" verify
+read -p "$COLOR_YELLOW*** Would you like to manually verify the root certificate? [Y/n]: $TEXT_RESET" verify
 
 if [[ $verify != 'n' ]]
 then
@@ -127,7 +127,12 @@ openssl ca -config $ROOT_DIR/openssl.cnf -extensions v3_intermediate_ca \
 chmod 444 certs/intermediate.cert.pem
 
 # verify intermediate cert
-read -p "$COLOR_YELLOW*** Would you like to verify the intermediate certificate? [Y/n]: $TEXT_RESET" verify
+
+info "Verifying your intermediate cert's validity."
+openssl verify -CAfile $ROOT_DIR/certs/root.cert.pem \
+	$INTERMEDIATE_DIR/certs/intermediate.cert.pem
+
+read -p "$COLOR_YELLOW*** Would you like to manually verify the intermediate certificate? [Y/n]: $TEXT_RESET" verify
 
 if [[ $verify != 'n' ]]
 then
@@ -143,10 +148,7 @@ then
     fi
 fi
 
-info "Verifying your intermediate cert's validity."
-openssl verify -CAfile $ROOT_DIR/certs/root.cert.pem \
-	$INTERMEDIATE_DIR/certs/intermediate.cert.pem
-
 # create intermediate cert chain
 info "Creating intermediate ca cert chain at $INTERMEDIATE_DIR/certs/intermediate-chain.cert.pem"
 cat $INTERMEDIATE_DIR/certs/intermediate.cert.pem $ROOT_DIR/certs/root.cert.pem > $INTERMEDIATE_DIR/certs/intermediate-chain.cert.pem
+chmod 444 $INTERMEDIATE_DIR/certs/intermediate-chain.cert.pem
