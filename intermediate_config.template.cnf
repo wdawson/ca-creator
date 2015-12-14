@@ -97,6 +97,8 @@ subjectKeyIdentifier = hash
 authorityKeyIdentifier = keyid:always,issuer
 basicConstraints = critical, CA:true, pathlen:0
 keyUsage = critical, digitalSignature, cRLSign, keyCertSign
+crlDistributionPoints = URI:http://REPLACE_ME__MY_CRL_URI
+authorityInfoAccess = OCSP;URI:http://REPLACE_ME__MY_OCSP_URI
 
 [ usr_cert ]
 # Extensions for client certificates (`man x509v3_config`).
@@ -107,6 +109,8 @@ subjectKeyIdentifier = hash
 authorityKeyIdentifier = keyid,issuer
 keyUsage = critical, nonRepudiation, digitalSignature, keyEncipherment
 extendedKeyUsage = clientAuth, emailProtection
+crlDistributionPoints = URI:http://REPLACE_ME__MY_CRL_URI
+authorityInfoAccess = OCSP;URI:http://REPLACE_ME__MY_OCSP_URI
 
 [ server_cert ]
 # Extensions for server certificates (`man x509v3_config`).
@@ -117,8 +121,8 @@ subjectKeyIdentifier = hash
 authorityKeyIdentifier = keyid,issuer:always
 keyUsage = critical, digitalSignature, keyEncipherment
 extendedKeyUsage = serverAuth
-crlDistributionPoints = URI:REPLACE_ME__MY_CRL_URI
-authorityInfoAccess = OCSP;URI:REPLACE_ME__MY_OCSP_URI
+crlDistributionPoints = URI:http://REPLACE_ME__MY_CRL_URI
+authorityInfoAccess = OCSP;URI:http://REPLACE_ME__MY_OCSP_URI
 
 [ crl_ext ]
 # Extension for CRLs (`man x509v3_config`).

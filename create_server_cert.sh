@@ -50,6 +50,7 @@ openssl req -config openssl.cnf -key private/$SERVER_NAME.key.pem \
 	-new -sha256 -out csr/$SERVER_NAME.csr.pem
 
 # signing the csr
+info "Signing the server's cert. You'll be prompted for the intermediate passphrase and to verify the server's information."
 openssl ca -config openssl.cnf -extensions server_cert -notext \
 	-in csr/$SERVER_NAME.csr.pem \
 	-out certs/$SERVER_NAME.cert.pem
@@ -69,7 +70,14 @@ then
 
     if [[ $correct == 'n' ]]
     then
-	info "You should revoke this certificate!"
+	info "Revoking this certificate. You'll be prompted for the intermediate passphrase"
+	openssl ca -config openssl.cnf \
+		-revoke certs/$SERVER_NAME.cert.pem
+	info "Recreating CRL. You'll be prompted for the intermediate passphrase."
+	openssl ca -config openssl.cnf -gencrl \
+		-out crl/intermediate.crl.pem
+	info "Removing files..."
+	rm -f private/$SERVER_NAME.key.pem csr/$SERVER_NAME.csr.pem certs/$SERVER_NAME.cert.pem
 	exit 1
     fi
 fi
