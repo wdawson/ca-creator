@@ -75,7 +75,7 @@ then
 		-revoke certs/$SERVER_NAME.cert.pem
 	info "Recreating CRL. You'll be prompted for the intermediate passphrase."
 	openssl ca -config openssl.cnf -gencrl \
-		-out crl/intermediate.crl.pem
+		-out crl/crl.pem
 	info "Removing files..."
 	rm -f private/$SERVER_NAME.key.pem csr/$SERVER_NAME.csr.pem certs/$SERVER_NAME.cert.pem
 	exit 1

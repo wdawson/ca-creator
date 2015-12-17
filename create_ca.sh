@@ -3,7 +3,7 @@ set -e
 
 function display_usage() {
     echo -e "Creates a CA with a root and an intermediate certificate"
-    echo -e "\nUsage:\n$0 <name> <crl_base_uri> <ocsp_domain>\n"
+    echo -e "\nUsage:\n$0 <name> <ca_domain>\n"
 }
 
 COLOR_YELLOW=$(tput setaf 3)
@@ -47,7 +47,7 @@ function create_ocsp() {
 ## Start Execution
 ##
 
-if [[ $# -le 2 ]]
+if [[ $# -le 1 ]]
 then
     display_usage
     exit 1
@@ -66,10 +66,11 @@ fi
 
 # setup ca directory
 CA_NAME=$1
-CRL_URI=$2
-OCSP_DOMAIN=$3
+CA_DOMAIN=$2
 ROOT_DIR=`pwd`/cas/$1
-ROOT_OCSP_DOMAIN=root.$CA_NAME.$OCSP_DOMAIN
+ROOT_CA_DOMAIN=root.$CA_DOMAIN
+ROOT_CRL_URI=$ROOT_CA_DOMAIN/crls/crl.pem
+ROOT_OCSP_URI=$ROOT_CA_DOMAIN/ocsp
 info "Setting up directory for your root ca at $ROOT_DIR"
 mkdir -p $ROOT_DIR
 cd $ROOT_DIR
@@ -80,7 +81,7 @@ echo 1000 > serial
 echo 1000 > crlnumber
 
 # add template root config
-replace_config ../../root_config.template.cnf $ROOT_DIR $CRL_URI/$CA_NAME/root.crl.pem $ROOT_OCSP_DOMAIN
+replace_config ../../root_config.template.cnf $ROOT_DIR $ROOT_CRL_URI $ROOT_OCSP_URI
 
 # create root key
 info "Creating your root key. You'll be prompted to create a passphrase for it."
@@ -115,14 +116,14 @@ fi
 # create crl
 info "Creating the crl for your root CA. You'll be prompted for the root's passphrase."
 openssl ca -config openssl.cnf \
-	-gencrl -out crl/root.crl.pem
+	-gencrl -out crl/crl.pem
 
 # create ocsp
-if [[ ! -f certs/$ROOT_OCSP_DOMAIN.cert.pem ]]
+if [[ ! -f certs/$ROOT_CA_DOMAIN.cert.pem ]]
 then
-    create_ocsp $ROOT_OCSP_DOMAIN
+    create_ocsp $ROOT_CA_DOMAIN
 else
-    info "Found pre-exisiting ocsp cert for $OCSP_DOMAIN. Using that."
+    info "Found pre-exisiting ocsp cert for $ROOT_CA_DOMAIN. Using that."
 fi
 
 #####################
@@ -131,7 +132,9 @@ fi
 
 # setup intermediate directory
 INTERMEDIATE_DIR=$ROOT_DIR/intermediate
-INTERMEDIATE_OCSP_DOMAIN=intermediate.$CA_NAME.$OCSP_DOMAIN
+INTERMEDIATE_CA_DOMAIN=intermediate.$CA_DOMAIN
+INTERMEDIATE_CRL_URI=$INTERMEDIATE_CA_DOMAIN/crls/crl.pem
+INTERMEDIATE_OCSP_URI=$INTERMEDIATE_CA_DOMAIN/ocsp
 info "Setting up directory for your intermediate ca at $INTERMEDIATE_DIR"
 mkdir -p $INTERMEDIATE_DIR
 cd $INTERMEDIATE_DIR
@@ -142,7 +145,7 @@ echo 1000 > serial
 echo 1000 > crlnumber
 
 # add template intermediate config
-replace_config ../../../intermediate_config.template.cnf $INTERMEDIATE_DIR $CRL_URI/$CA_NAME/intermediate.crl.pem $INTERMEDIATE_OCSP_DOMAIN
+replace_config ../../../intermediate_config.template.cnf $INTERMEDIATE_DIR $INTERMEDIATE_CRL_URI $INTERMEDIATE_OCSP_URI
 
 # create intermediate key
 info "Creating your intermediate key. You'll be prompted to create a passphrase for it."
@@ -194,14 +197,14 @@ chmod 444 $INTERMEDIATE_DIR/certs/intermediate-chain.cert.pem
 # create crl
 info "Creating the crl for your intermediate CA. You'll be prompted for the intermediate passphrase."
 openssl ca -config openssl.cnf \
-	-gencrl -out crl/intermediate.crl.pem
+	-gencrl -out crl/crl.pem
 
 # create ocsp
-if [[ ! -f certs/$INTERMEDIATE_OCSP_DOMAIN.cert.pem ]]
+if [[ ! -f certs/$INTERMEDIATE_CA_DOMAIN.cert.pem ]]
 then
-    create_ocsp $INTERMEDIATE_OCSP_DOMAIN
+    create_ocsp $INTERMEDIATE_CA_DOMAIN
 else
-    info "Found pre-exisiting ocsp cert for $INTERMEDIATE_OCSP_DOMAIN. Using that."
+    info "Found pre-exisiting ocsp cert for $INTERMEDIATE_CA_DOMAIN. Using that."
 fi
 
 info "Created $CA_NAME with root and intermediate CAs. Go ahead and use create_server_cert.sh to make server keys."

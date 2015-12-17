@@ -79,7 +79,7 @@ emailAddress                    = Email Address
 # Optionally, specify some defaults.
 countryName_default             = US
 stateOrProvinceName_default     = California
-localityName_default            = San Francsico
+localityName_default            = San Francisco
 0.organizationName_default      =
 organizationalUnitName_default  =
 emailAddress_default            =
