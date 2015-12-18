@@ -28,6 +28,7 @@ then
     display_usage
     exit 0
 fi
+
 #####################
 #    Server Cert    #
 #####################
@@ -70,7 +71,7 @@ then
 
     if [[ $correct == 'n' ]]
     then
-	info "Revoking this certificate. You'll be prompted for the intermediate passphrase"
+	info "Revoking this certificate. You'll be prompted for the intermediate passphrase."
 	openssl ca -config openssl.cnf \
 		-revoke certs/$SERVER_NAME.cert.pem
 	info "Recreating CRL. You'll be prompted for the intermediate passphrase."
